@@ -1,0 +1,48 @@
+#Variable Initialisation 
+
+readcnt = 0; //Counter to store the number of readers inside the critical section
+mutex = 0; //Binary semaphore to protect shared counter readcnt.
+
+roomEmpty = 1;//Binary semaphore to ensure mutual exclusion of readers and writers.
+gateEmpty = 1;//Binary semaphore which acts as mutex for writers and turnstile for readers.
+
+
+// Writer Solution.
+
+void writer()
+{
+    wait(gateEmpty);
+    wait(roomEmpty);
+        //critical section of writer. Do writing here.
+        doWriting();
+    signal(gateEmpty);
+    signal(roomEmpty);
+}
+
+//Reader Solution
+
+void reader()
+{
+    wait(gateEmpty);
+    signal(gateEmpty);
+
+    wait(mutex);
+
+    readcnt+=1;
+    if(readcnt==1)
+    wait(roomEmpty);
+
+    signal(mutex);
+
+    //Do reading here. critical Seciton of reader.
+    doReading();
+
+    //Now Reader wants to exit.
+    wait(mutex);
+
+    readcnt-=1;
+    if(readcnt==0)
+    signal(roomEmpty);
+    
+    signal(mutex);
+}
